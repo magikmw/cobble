@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-__doc__ = """File for all the small utility functions useful across the module.
+"""File for all the small utility functions useful across the module.
 """
 
 """This file is part of Cobble.

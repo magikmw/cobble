@@ -1,7 +1,7 @@
 #! /bin/env python
 # -*- coding: UTF-8 -*-
 
-__doc__ = """Main file, parse arguments and run the program"""
+"""Main file, parse arguments and run the program"""
 
 """This file is part of Cobble.
 

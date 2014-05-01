@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-__doc__ = """Build static pages and return in some form to the builder to save \
+"""Build static pages and return in some form to the builder to save \
 as file"""
 
 """This file is part of Cobble.
@@ -49,7 +49,7 @@ def generate_articles(files, project_path):
 
     # save the output files
     for a in articles:
-        outpath = project_path+'/output/articles/'+ \
+        outpath = project_path+'/static/articles/'+ \
             os.path.basename((os.path.splitext(a)[0]+'.html'))
         open(outpath, 'w+').write(temp_article.render(contents=articles[a]))
 
