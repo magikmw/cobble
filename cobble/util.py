@@ -34,3 +34,7 @@ def abs_file_paths(directory):
         for f in filenames:
             paths.append(os.path.abspath(os.path.join(dirpath, f)))
     return paths
+
+def get_html_path(filepath, static_type, project_path):
+    return project_path+'/static/'+static_type+'/'+ \
+        os.path.basename((os.path.splitext(filepath)[0]+'.html'))

@@ -25,6 +25,11 @@ import os
 import mistune
 from jinja2 import Environment, FileSystemLoader
 
+from util import get_html_path
+
+_SUB_TEMPLATES = ["_head.html", "_header.html", '_menu.html', '_footer.html']
+_TEMPLATES = ["article.html"]
+
 def generate_articles(files, project_path):
     """Given a list of files, template and destination, output static articles
 
@@ -38,19 +43,30 @@ def generate_articles(files, project_path):
     for f in files:
         articles[f] = open(f).read()
 
-    # parse the markup into html
+    # parse the markup into html, change the keys to .html too
+    html_articles = {}
     for a in articles:
-        # print(a)
-        articles[a] = mistune.markdown(articles[a])
+        html_path = get_html_path(a, 'articles', project_path)
+        html_articles[html_path] = mistune.markdown(articles[a])
 
     # render data into a template
     template_env = Environment(loader=FileSystemLoader('templates'))
+    sub_templates = {}
+    for tmp in _SUB_TEMPLATES:
+        sub_templates[tmp] = template_env.get_template(tmp)
     temp_article = template_env.get_template('article.html')
 
+    # render subtemplates
+    # rendered_sub = render_subtemplates(sub_templates)
+
     # save the output files
-    for a in articles:
-        outpath = project_path+'/static/articles/'+ \
-            os.path.basename((os.path.splitext(a)[0]+'.html'))
-        open(outpath, 'w+').write(temp_article.render(contents=articles[a]))
+    for a in html_articles:
+        open(a, 'w+').write(temp_article.render(
+            contents=html_articles[a],
+            head=sub_templates['_head.html'].render(),
+            header=sub_templates['_header.html'].render(),
+            menu=sub_templates['_menu.html'].render(),
+            footer=sub_templates['_footer.html'].render()
+            ))
 
     # [TODO] Special case for the index.html?
