@@ -57,7 +57,11 @@ def generate_articles(files, project_path):
     temp_article = template_env.get_template('article.html')
 
     # render subtemplates
-    # rendered_sub = render_subtemplates(sub_templates)
+    filenames = []
+    for a in html_articles:
+        filenames.append(os.path.basename(a))
+    if 'index.html' in filenames: filenames.remove('index.html')
+    menu = sub_templates['_menu.html'].render(articles=filenames)
 
     # save the output files
     for a in html_articles:
@@ -65,7 +69,7 @@ def generate_articles(files, project_path):
             contents=html_articles[a],
             head=sub_templates['_head.html'].render(),
             header=sub_templates['_header.html'].render(),
-            menu=sub_templates['_menu.html'].render(),
+            menu=menu,
             footer=sub_templates['_footer.html'].render()
             ))
 
