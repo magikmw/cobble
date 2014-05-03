@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-"""Build static pages and return in some form to the builder to save \
-as file"""
+"""Build static pages and return in some form to the builder to save as file
+"""
 
 """This file is part of Cobble.
 
@@ -20,15 +20,38 @@ along with Cobble; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 """
 
-import os
+from datetime import datetime
 
 import mistune
 from jinja2 import Environment, FileSystemLoader
 
-from util import get_html_path
+from util import get_output_path, parse_tags_to_dict
 
 _SUB_TEMPLATES = ["_head.html", "_header.html", '_menu.html', '_footer.html']
 _TEMPLATES = ["article.html"]
+
+class Article(object):
+    """Represents an article.
+    Given a raw string, parse the markdown and extract tags.
+
+    string: the raw data from an .md file to be parsed
+    """
+    def __init__(self, string):
+        # [0] is tags, [1:] is the content ('\n\n'.join() it!)
+        split_string = string.split('\n\n')
+
+        self.content = mistune.markdown('\n\n'.join(split_string[1:]))
+
+        tag_dict = parse_tags_to_dict(split_string[0].split('\n'))
+
+        if tag_dict:
+            # [TODO] Implement else cases where this data is pulled from contents/os
+            if 'title' in tag_dict:
+                self.title = tag_dict['title']
+            if 'date' in tag_dict:
+                self.date = datetime.strptime(tag_dict['date'], "%Y-%m-%d %H:%M")
+            if 'url' in tag_dict:
+                self.url = tag_dict['url']
 
 def generate_articles(files, project_path):
     """Given a list of files, template and destination, output static articles
@@ -37,17 +60,9 @@ def generate_articles(files, project_path):
     project_path: path under which all folders are
     """
 
-    # for each file, extract the data
-    # [TODO] Figure out the metadata thing
-    articles = {}
+    articles = []
     for f in files:
-        articles[f] = open(f).read()
-
-    # parse the markup into html, change the keys to .html too
-    html_articles = {}
-    for a in articles:
-        html_path = get_html_path(a, 'articles', project_path)
-        html_articles[html_path] = mistune.markdown(articles[a])
+        articles.append(Article(open(f).read()))
 
     # render data into a template
     template_env = Environment(loader=FileSystemLoader('templates'))
@@ -58,19 +73,25 @@ def generate_articles(files, project_path):
 
     # render subtemplates
     filenames = []
-    for a in html_articles:
-        filenames.append(os.path.basename(a))
-    if 'index.html' in filenames: filenames.remove('index.html')
-    menu = sub_templates['_menu.html'].render(articles=filenames)
+    for art in articles:
+        filenames.append(art.url)
+    # if 'index.html' in filenames: filenames.remove('index.html')
+    # [FIX] Find a way to remove the index.html from menu without not generating it.
+
+    # head - read content's first highest title and put it in the template
+    # print(filenames)
+    temp_menu = sub_templates['_menu.html'].render(articles=filenames)
+    # footer - put the .md file modification date here
 
     # save the output files
-    for a in html_articles:
-        open(a, 'w+').write(temp_article.render(
-            contents=html_articles[a],
-            head=sub_templates['_head.html'].render(),
-            header=sub_templates['_header.html'].render(),
-            menu=menu,
-            footer=sub_templates['_footer.html'].render()
-            ))
+    for art in articles:
+        open(get_output_path(art.url, 'articles', project_path), 'w+').write(
+                temp_article.render(
+                    contents=art.content,
+                    head=sub_templates['_head.html'].render(),
+                    header=sub_templates['_header.html'].render(),
+                    menu=temp_menu,
+                    footer=sub_templates['_footer.html'].render()
+                ))
 
     # [TODO] Special case for the index.html?

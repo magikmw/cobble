@@ -33,8 +33,20 @@ def abs_file_paths(directory):
     for dirpath,_,filenames in os.walk(directory):
         for f in filenames:
             paths.append(os.path.abspath(os.path.join(dirpath, f)))
-    return paths
 
-def get_html_path(filepath, static_type, project_path):
-    return project_path+'/static/'+static_type+'/'+ \
-        os.path.basename((os.path.splitext(filepath)[0]+'.html'))
+    return sorted(paths)
+
+def get_output_path(filename, static_type, project_path):
+    return project_path+'/static/'+static_type+'/'+filename
+
+def parse_tags_to_dict(taglist):
+    """Given a list of tag line strings, return a dict with tag:value pairs"""
+
+    if taglist:
+
+        tag_dict = {}
+        for pair in taglist:
+            split_pair = pair.split(': ')
+            tag_dict[split_pair[0].lower()] = split_pair[1]
+
+        return tag_dict
