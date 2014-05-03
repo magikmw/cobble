@@ -34,7 +34,9 @@ def version():
     """Print a version prompt"""
     print("cobble.py - static website/blog build script v." + __version__)
     print("Copyright (C) 2014 Michał Walczak <mw@michalwalczak.eu>")
-    #[TODO] Add licensing info before giting
+    print("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.")
+    print("This is free software: you are free to change and redistribute it.")
+    print("There is NO WARRANTY, to the extent permitted by law.")
 
 def parseopts():
     """Parse commandline arguments if any"""
